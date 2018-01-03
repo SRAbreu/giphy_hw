@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GifTastic Homework</title>
+  <!--could add a separate css later if there is time to style it-->
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+  <body>
+    <div class="container">
+      <h1>Favorite Movie Series</h1>
+    <!-- Movies will Get Dumped here -->
+      <div id="buttons-view"></div>
+       <form id="movie-form">
+        <label for="movie-input">Add a Movie</label>
+        <input type="text" id="movie-input"><br>
+      <!-- Button triggers new movie to be added -->
+        <input id="add-movie" type="submit" value="Add">
+      </form>
+    <!-- Rendered Buttons will get Dumped Here  -->
+      <div id="movies-view"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // arrays of movies
+      var movieSeries = ["x-men", "mad max", "blade runner"];
+      //var moreMovies = ["alien", "iron man", "lord of the rings", "the godfather", "star wars", "the hunger games", "harry potter", "batman", "matrix", "bourne", "spider-man", "the lion king", "divergent", "back to the future", "insurgent"];
+    //Function for displaying movie data
+    function renderButtons() {
+    // Deleting the movie buttons prior to adding new movie buttons
+    // (this is necessary otherwise we will have repeat buttons)
+    $("#buttons-view").empty();
+    // Looping through the array of movies, then generate buttons for each movie
+    for (var i = 0; i < movieSeries.length; i++) {
+      // This code $("<button>") is all jQuery needs to create the start and end tag. (<button></button>)
+      var a = $("<button>");
+      // Adding a class to the button
+      a.addClass("movie");
+      // Adding a data-attribute with a value of the movie at index i
+      a.attr("data-name", movieSeries[i]);
+      // Providing the button's text with a value of the movie at index i
+      a.text(movieSeries[i]);
+      // Adding the button to the HTML
+      $("#buttons-view").append(a);
+      }
+    }
+    // Calling the renderButtons function to display the initial array of movies
+      renderButtons();
+      // This function handles events when the add movie button is clicked
+     $("#add-movie").on("click", function(event) {
+       // event.preventDefault() prevents submit button from trying to submit itself.
+       // Using a form & submit button instead of a regular button allows the user to hit "Enter" as well as click the button.
+       event.preventDefault();
+       // grabing the text the user types into the input field
+       var movie = $("#movie-input").val().trim();
+       //.trim removes spaces
+       // pushing the new movie into the movieSeries array
+       movieSeries.push(movie);
+       // calling renderButtons again, rendering the list of movie buttons w/ the added ones
+       renderButtons();
+     });
+
+  //Event listener for all buttons
+  $("#buttons-view").on("click", "button", function() {
+    //clearing
+     $("#movies-view").empty();
+    //grabbing & storing the movie attr
+    //"this" refers to the button that will be clicked
+    var flicks = $(this).attr("data-name");
+    //constructing the queryURL to search giphy using the movie names from movieSeries
+    var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + flicks + "&api_key=FAHrw8tLFIRAcY6BbRJ29mH3Qp7z1Tvq&limit=10";
+    // Creating an AJAX call for the specific movie button being clicked
+    $.ajax({
+      url: queryURL,
+      method: "GET"
+    }).done(function(response) {
+      //console.log(queryURL);
+      //console.log(response);
+      //storing data from the request in a variable
+      var results = response.data;
+      // Looping through each result item
+      for (var i = 0; i < results.length; i++) {
+      //Do I really need this? Creating and storing a div tag
+      var newDiv = $("<div>");
+      // Creating a paragraph tag with the result item's rating
+      var p = $("<p>").text("Rating: " + results[i].rating);
+      // Creating and storing an image tag
+      var flickImage = $("<img>");
+      flickImage.addClass('gifs')
+      // Setting the src attribute of the image to a property pulled off the result item
+      flickImage.attr("src", results[i].images.fixed_height.url);
+      //gifs are animated by default, so need to make them still when clicked & then back to animated
+      flickImage.attr("data-animate", results[i].images.fixed_height.url)
+      //I'm basically storing the links that are still so I can call it later
+      flickImage.attr("data-still", results[i].images.fixed_height_still.url)
+      //data-state is used to keep track of the state of somenthing
+      flickImage.attr("data-state","animated")
+      // Appending the paragraph and image tag to the newDiv
+      newDiv.append(p);
+      newDiv.append(flickImage);
+      // Appending the newDiv to the HTML page in the "#movies-view" div
+      $("#movies-view").append(newDiv);
+      }
+    });
+  });
+
+    //Now the event delegation. This "on click" handles the callback function.
+    //I decided to use "document" because I was able to make it work. But I should really use the parent div "buttons-view" (I think) so it recognizes the entire div & updates everything- including the new buttons that are added.
+  $(document).on("click", "img",function() {
+  var currentState = $(this).attr('data-state')
+  if( currentState === 'still'){
+    //"this" refers to img here
+    $(this).attr('src', $(this).attr('data-animate'))
+    $(this).attr('data-state','animated')
+  }
+  else{
+    $(this).attr('src', $(this).attr('data-still'))
+    $(this).attr('data-state','still')
+  }
+});
+      </script>
+    </div>
+  </body>
+</html>
