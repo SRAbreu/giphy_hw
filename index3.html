@@ -75,9 +75,10 @@
     //grabbing & storing the movie attr
     //"this" refers to the button that will be clicked
     var flicks = $(this).attr("data-name");
+    
     //constructing the queryURL to search giphy using the movie names from movieSeries
     var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + flicks + "&api_key=FAHrw8tLFIRAcY6BbRJ29mH3Qp7z1Tvq&limit=10";
-    // Creating an AJAX call for the specific movie button being clicked
+    // Creating an AJAX call for the specific movie button being clicked (the gify API call)
     $.ajax({
       url: queryURL,
       method: "GET"
@@ -117,7 +118,7 @@
   $(document).on("click", "img",function() {
   var currentState = $(this).attr('data-state')
   if( currentState === 'still'){
-    //"this" refers to img here
+    //"this" refers to img. If the image is still then animate it.
     $(this).attr('src', $(this).attr('data-animate'))
     $(this).attr('data-state','animated')
   }
